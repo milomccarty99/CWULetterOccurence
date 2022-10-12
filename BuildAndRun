@@ -1,0 +1,3 @@
+g++ CWULetterOccurrence.cpp -o a.out
+./a.out sample.txt
+rm a.out
