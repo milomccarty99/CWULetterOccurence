@@ -9,15 +9,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define FILEPATH "./temp.tmp"
-#define NUMINTS (26) // 26 for now, but we will want to keep stats of non-alphabet chars
+#define NUMINTS (256) // we will examine all ascii chars
+#define LOWERCASE_OFFSET (97)
+#define UPPERCASE_OFFSET (65)
 #define FILESIZE (NUMINTS *sizeof(int))
 using namespace std;
 
 
 class OccurrenceHandler {
 	public:
-		// aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ,!?-.01234567890
+	//iterates through the file provided (filename) to find number of char c in file
 		int singleLetter(string filename, char c) {
 			string line;
 			int count = 0;
@@ -71,46 +72,40 @@ int main(int argc, char** argv)
 	
 	OccurrenceHandler myObj;
 
-	//int pid = fork();
-
-	for(int i =  0; i < 26; i++)
+	//iterate through all ascii characters to fulfill tracking requirements
+	for(int i =  0; i < NUMINTS ; i++)
 	{
 		int pid = fork(); //fork returns the pid number
 		if(pid ==0)
 		{
-			//ChildProcess();
-			map[i] += myObj.singleLetter(filename, i+65);
-			//cout << ((char)(i+65)) << ": " << counts[i] << endl;
-			//*cptr+=1;
-			//cout<<*cptr << endl;
+			map[i] += myObj.singleLetter(filename, i);
 			
 			exit(EXIT_SUCCESS);
 		}
 		else{
-			//ParentProcess();
+			// cout << "hello from parent" << endl;
 		}
 		
 	}
-	for(int i = 0; i <26; i++)
+	// wait until all child processes terminate
+	while(wait(NULL) >= 0);
+	/*
+	//printing statement for all ascii chars
+	for(int i = 0; i < NUMINTS; i++)
 	{
-		//counts2[i] = 0;
-		int pid = fork();
-		if(pid ==0)
-		{
-			map[i]+= myObj.singleLetter(filename,i+97);
-			//cout << ((char)(i+97)) << ":: " << *counts2[i]<<endl;
-			return 0;
-		}
+		cout <<((char)(i))<<":: "<< (map[i]) << endl;
 	}
-	while(wait(NULL) >= 0);
-
-	//printing statement
-	for(int i = 0; i < 26; i++){
-		cout <<((char)(97+i))<<":: "<< (map[i]) << endl;
+	*/
+	int* alphabet = (int*)calloc(0,26 * sizeof(int));
+	for(int i = 0; i < 26; i++)
+	{
+		alphabet[i] = map[LOWERCASE_OFFSET + i] + map[UPPERCASE_OFFSET + i];
 	}
 
-	while(wait(NULL) >= 0);
-	//cout << map[20] <<endl ;
+	for(int i = 0; i < 26; i++)
+	{
+		cout<< ((char)(i+LOWERCASE_OFFSET)) << ": " << alphabet[i] << endl;
+	}
 	cout << "exiting program" << endl;
 	return 0;
 
