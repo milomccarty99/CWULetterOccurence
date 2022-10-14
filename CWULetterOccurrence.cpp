@@ -86,15 +86,55 @@ void outputData(tuple<char, int> * data, int size)
 	}
 }
 
+//given a sorted list of alphabet characters
+void displayBarGraph(tuple<char, int> * data, int size)
+{
+	cout<<"bar graph of letter occurrence: " << endl;
+	if(size == 0)
+	{
+		return;
+	}
+	int height = 10;
+	int largest = get<1>(data[0]);
+	int bar = largest / height;
+	if(bar<=0)
+	{
+		bar = 1;
+	}
+	int *vis = (int*) malloc(size * sizeof(int));
+	for(int i = 0; i < size; i++)
+	{
+		vis[i] = ((int)(get<1>(data[i])/ bar));
+	}
+
+	for(int i = height -1; i >= 0; i--)
+	{
+		for(int j = 0; j < size; j++)
+		{
+			if(vis[j]>= i)
+			{
+				cout<< "█ ";
+			}
+			else
+			{
+				cout << "  ";
+			}
+		}
+		cout << endl;
+	}
+	for(int i = 0; i < size; i ++ )
+	{
+		cout << get<0>(data[i]) << " " ;
+	}
+	cout << endl;
+}
 //
 int main(int argc, char** argv)
 {
 	// arguments
 
-	// -d double letters (seperate process)
-	// -p letter pairs (seperate process)
-	// -v visual
-
+	// -i ignore bar graph
+	bool showBarGraph = true;
 	string filename = "file not provided";
 	for(int i = 1; i < argc; i++)
 	{
@@ -105,6 +145,15 @@ int main(int argc, char** argv)
 		else
 		{
 			cout << "cli argument" << argv[i] << endl;
+			int j = 0; 
+			while(argv[i][j] != '\0')
+			{
+				if(argv[i][j] == 'i')
+				{
+					showBarGraph = false;
+				}
+				j++;
+			}
 		}
 	}
 
@@ -117,14 +166,11 @@ int main(int argc, char** argv)
 	for(int i =  0; i < NUMINTS ; i++)
 	{
 		int pid = fork(); //fork returns the pid number
-		if(pid ==0)
+		if(pid ==0) // child process
 		{
 			map[i] += myObj.singleLetter(filename, i);
 			
 			exit(EXIT_SUCCESS);
-		}
-		else{
-			// cout << "hello from parent" << endl;
 		}
 		
 	}
@@ -143,7 +189,10 @@ int main(int argc, char** argv)
 	quickSort(alphabet, 0, ALPHABET_LEN -1);
 
 	outputData(alphabet,ALPHABET_LEN);
+	if(showBarGraph) 
+		displayBarGraph(alphabet, ALPHABET_LEN);
 	cout << "exiting program" << endl;
+	//unmap allocated shared memory
 	munmap(map,MMAP_FILESIZE);
 	return 0;
 
